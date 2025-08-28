@@ -61,5 +61,5 @@ def main():
     counts, total = dem_tinhtong(lines)
     in_bang(counts, total)
 
-if __name__ == "__main__":
-    main()
+main()
+
