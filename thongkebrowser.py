@@ -5,17 +5,22 @@ from urllib.request import urlopen
 BROWSER_SORT = ["Chrome","Edge","Firefox","Safari","Opera","Samsung Internet","IE","Chromium","Brave","Bots","Other"]
 
 def phan_loai_browser(ua: str) -> str:
-    s = ua.lower()
-    if " edg/" in s or " edge/" in s: return "Edge"
-    if " opr/" in s or " opera" in s: return "Opera"
-    if "samsungbrowser" in s: return "Samsung Internet"
-    if "brave" in s: return "Brave"
-    if ("chrome/" in s and "chromium" not in s and " opr/" not in s and " edg/" not in s and "samsungbrowser" not in s): return "Chrome"
-    if "firefox/" in s: return "Firefox"
-    if ("safari/" in s and "version/" in s and "chrome/" not in s and "chromium" not in s and " opr/" not in s and " edg/" not in s): return "Safari"
-    if "msie" in s or "trident/" in s: return "IE"
-    if "chromium/" in s: return "Chromium"
-    return "Other"
+    logs = re.findall(r'([a-zA-Z0-9_\-][a-zA-Z0-9_\-]+)/[\d][\d\.]*', ua)
+
+    ua_lower = ua.lower()
+    if "safari/" in ua_lower and "chrome/" not in ua_lower:
+        return "Safari"
+
+    if "chrome/" in ua_lower and not any(x in ua_lower for x in ["opr/", "edg/"]):
+        return "Chrome"
+
+    if not logs:
+        words = re.findall(r'[a-zA-Z0-9_\-][a-zA-Z0-9_\-]+', ua)
+        if words:
+            return words[0]
+        return "-"
+
+    return logs[-1].capitalize()
 
 def tach_ua(line: str):
     qs = re.findall(r'"([^"]*)"', line)
@@ -62,4 +67,3 @@ def main():
     in_bang(counts, total)
 
 main()
-
