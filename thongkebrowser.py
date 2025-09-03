@@ -4,7 +4,6 @@ from urllib.request import urlopen
 from user_agents import parse
 
 
-
 def phan_loai_browser(ua: str) -> str:
     user_agent = parse(ua)
     return user_agent.browser.family
@@ -12,7 +11,7 @@ def phan_loai_browser(ua: str) -> str:
 
 def tach_ua(line: str):
     qs = re.findall(r'"([^"]*)"', line)
-    return qs[2] if len(qs) >= 3 else None
+    return qs[-1]
 
 def doc_tu_url(url: str):
     with urlopen(url) as resp:
@@ -33,10 +32,6 @@ def dem_tinhtong(lines):
     return c, tot
 
 def in_bang(counts: Counter, total: int):
-    if total == 0:
-        print("(no data)")
-        return
-    # sắp xếp: giảm dần theo count, nếu bằng nhau thì theo tên
     items = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
     print(f"{'Browser':<30} {'Requests':>10} {'Share %':>9}")
     print(f"{'-'*20} {'-'*10:>10} {'-'*9:>9}")
