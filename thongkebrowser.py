@@ -1,26 +1,14 @@
 import argparse, re
 from collections import Counter
 from urllib.request import urlopen
+from user_agents import parse
 
-BROWSER_SORT = ["Chrome","Edge","Firefox","Safari","Opera","Samsung Internet","IE","Chromium","Brave","Bots","Other"]
+
 
 def phan_loai_browser(ua: str) -> str:
-    logs = re.findall(r'([a-zA-Z0-9_\-][a-zA-Z0-9_\-]+)/[\d][\d\.]*', ua)
+    user_agent = parse(ua)
+    return user_agent.browser.family
 
-    ua_lower = ua.lower()
-    if "safari/" in ua_lower and "chrome/" not in ua_lower:
-        return "Safari"
-
-    if "chrome/" in ua_lower and not any(x in ua_lower for x in ["opr/", "edg/"]):
-        return "Chrome"
-
-    if not logs:
-        words = re.findall(r'[a-zA-Z0-9_\-][a-zA-Z0-9_\-]+', ua)
-        if words:
-            return words[0]
-        return "-"
-
-    return logs[-1].capitalize()
 
 def tach_ua(line: str):
     qs = re.findall(r'"([^"]*)"', line)
@@ -45,16 +33,19 @@ def dem_tinhtong(lines):
     return c, tot
 
 def in_bang(counts: Counter, total: int):
-    if total == 0: print(f"(no data)"); return
-    order = {n:i for i,n in enumerate(BROWSER_SORT)}
-    items = sorted(counts.items(), key=lambda kv: (-kv[1], order.get(kv[0], 999)))
-    print(f"{'Browser':<20} {'Requests':>10} {'Share %':>9}")
+    if total == 0:
+        print("(no data)")
+        return
+    # sắp xếp: giảm dần theo count, nếu bằng nhau thì theo tên
+    items = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    print(f"{'Browser':<30} {'Requests':>10} {'Share %':>9}")
     print(f"{'-'*20} {'-'*10:>10} {'-'*9:>9}")
     for name, cnt in items:
-        pct = cnt*100/total
-        print(f"{name:<20} {cnt:>10} {pct:>8.1f}%")
-    print(f"{'-'*20} {'-'*10:>10} {'-'*9:>9}")
-    print(f"{'Total':<20} {total:>10} {100.0:>8.1f}%\n")
+        pct = cnt * 100 / total
+        print(f"{name:<30} {cnt:>10} {pct:>8.1f}%")
+    print(f"{'-'*30} {'-'*10:>10} {'-'*9:>9}")
+    print(f"{'Total':<30} {total:>10} {100.0:>8.1f}%\n")
+
 
 def main():
     parser = argparse.ArgumentParser()
